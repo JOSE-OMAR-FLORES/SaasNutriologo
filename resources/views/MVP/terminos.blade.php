@@ -1,4 +1,8 @@
-<x-layout meta-title="Términos y Condiciones">
+@extends('layouts.app')
+
+@section('content')
+    
+
   <section class="bg-gray-50 py-12">
     <div class="max-w-3xl mx-auto px-4">
       <div class="text-center mb-10">
@@ -29,8 +33,8 @@
         <h4 class="font-semibold text-blue-700 text-lg mb-2 mt-6">11. Legislación Aplicable</h4>
         <p class="text-gray-600 mb-6">Estos términos se rigen por las leyes de México. Cualquier disputa se resolverá ante los tribunales competentes del Estado de Jalisco, salvo acuerdo mutuo de otra jurisdicción.</p>
         <h4 class="font-semibold text-blue-700 text-lg mb-2 mt-6">12. Contacto</h4>
-        <p class="text-gray-600">Si tienes dudas sobre estos términos, contáctanos a través de <a href="mailto:soporte@tusaa.com" class="text-green-600 underline">soporte@tusaa.com</a>.</p>
+        <p class="text-gray-600">Si tienes dudas sobre estos términos, contáctanos a través de <a href="mailto:soporte@tusaa.com" class="text-green-600 underline">soporte@9b.com</a>.</p>
       </div>
     </div>
   </section>
-</x-layout>
+@endsection

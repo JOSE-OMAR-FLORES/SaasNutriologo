@@ -14,8 +14,21 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
-});
+    return view('MVP.home');
+})->name("home");
+Route::get('/about', function () {
+    return view('MVP.about');
+})->name("about");
+Route::get('/terminos_y_condiciones', function () {
+    return view('MVP.terminos');
+})->name("terminos");
+Route::get('/contacto', function () {
+    return view('MVP.contacto');
+})->name("contacto");
+
+Route::get("/terminos", function(){
+    return view("MVP.terminos");
+})->name("terminos");
 
 Route::get('/elige-plan', function () {
     return view('auth.planes');
@@ -36,13 +49,30 @@ Route::post('/pago/procesar', [PagoController::class, 'procesar'])->name('pago.p
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+    Route::put('/admin/usuarios/{id}', [AdminController::class, 'update'])->name('admin.usuarios.update');
+Route::delete('/admin/usuarios/{id}/delete', [AdminController::class, 'destroy'])->name('admin.usuarios.destroy');
+
 });
 
 //RUTAS CLINCA
 
-Route::middleware(['auth', 'role:clinica'])->group(function () {
-    Route::get('clinica/dashboard', [ClinicaController::class, 'index'])->name('clinica.dashboard');
+//Route::middleware(['auth', 'role:clinica'])->group(function () {
+//    Route::get('clinica/dashboard', [ClinicaController::class, 'index'])->name('clinica.dashboard');
+//});
+
+Route::middleware(['auth', 'role:clinica'])->prefix('clinica')->name('clinica.')->group(function () {
+    Route::get('/dashboard', [ClinicaController::class, 'index'])->name('dashboard');
+
+    // Rutas para el CRUD de nutriólogos
+    Route::get('/nutriologos', [ClinicaController::class, 'index'])->name('nutriologos.index');
+    Route::get('/nutriologos/create', [ClinicaController::class, 'create'])->name('nutriologos.create');
+    Route::post('/nutriologos', [ClinicaController::class, 'store'])->name('nutriologos.store');
+    Route::get('/nutriologos/{id}', [ClinicaController::class, 'show'])->name('nutriologos.show');
+    Route::get('/nutriologos/{id}/edit', [ClinicaController::class, 'edit'])->name('nutriologos.edit');
+    Route::put('/nutriologos/{id}', [ClinicaController::class, 'update'])->name('nutriologos.update');
+    Route::delete('/nutriologos/{id}', [ClinicaController::class, 'destroy'])->name('nutriologos.destroy');
 });
+
 
 
 //RUTAS PROFESIONALES
@@ -75,4 +105,4 @@ Route::middleware(['auth', 'role:free'])->group(function () {
     Route::resource('free/notas', NotaController::class)->names("free.notas");
 });
 
-//Todo: admin@example.com , "admin123"
+//Todo: admin@miapp.com , "admin1234"

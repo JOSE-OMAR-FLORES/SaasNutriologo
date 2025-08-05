@@ -1,8 +1,11 @@
-<x-layout meta-title="Contacto">
+@extends('layouts.app')
+
+@section('content')
+
   <div class="max-w-2xl mx-auto py-12 px-4">
     <div class="bg-white shadow-lg rounded-3xl p-8">
       <h2 class="text-3xl font-extrabold text-green-600 mb-6">Contáctanos</h2>
-      <form method="POST" action="{{ route('formulario') }}" class="space-y-6">
+      <form method="POST" action="{{ route('register') }}" class="space-y-6">
         @csrf
         <div>
           <label for="nombre" class="block text-sm font-medium text-gray-700">Nombre completo</label>
@@ -54,4 +57,5 @@
       </form>
     </div>
   </div>
-</x-layout>
+    
+@endsection

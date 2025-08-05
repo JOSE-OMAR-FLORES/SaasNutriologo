@@ -1,4 +1,7 @@
-<x-layout meta-title="Inicio">
+@extends('layouts.app')
+
+@section('content')
+    
 
   <!-- Hero Section -->
   <section class="bg-gradient-to-r from-emerald-500 to-green-600 text-white text-center py-20">
@@ -85,7 +88,7 @@
     <div class="container mx-auto px-4">
       <h2 class="text-3xl font-bold mb-4">¿Listo para empezar?</h2>
       <p class="text-lg mb-6">Activa tu cuenta en minutos y comienza gratis.</p>
-      <a href="{{ route('contacto') }}" class="inline-block bg-white text-green-600 font-semibold px-8 py-3 rounded-full shadow hover:shadow-xl transition-transform transform hover:scale-105 glow-animation">Probar Gratis</a>
+      <a href="{{ route('register') }}" class="inline-block bg-white text-green-600 font-semibold px-8 py-3 rounded-full shadow hover:shadow-xl transition-transform transform hover:scale-105 glow-animation">Probar Gratis</a>
 
     </div>
   </section>
@@ -121,4 +124,4 @@
 }
   </style>
 
-</x-layout>
+@endsection
