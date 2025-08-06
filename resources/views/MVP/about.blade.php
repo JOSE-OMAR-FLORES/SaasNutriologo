@@ -1,4 +1,8 @@
-<x-layout meta-title="Nosotros">
+@extends('layouts.mvp')
+
+@section('title', 'Nosotros')
+
+@section('content')
   <!-- Sección Intro -->
   <section class="bg-gray-50 py-12">
     <div class="max-w-5xl mx-auto px-4">
@@ -70,4 +74,4 @@
       </div>
     </div>
   </section>
-</x-layout>
+@endsection
