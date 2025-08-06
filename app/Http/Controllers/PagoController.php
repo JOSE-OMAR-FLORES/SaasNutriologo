@@ -44,6 +44,6 @@ class PagoController extends Controller
         auth()->login($user);
 
         // Redirige según su rol
-        return redirect()->route('home');
+        return redirect()->route('dashboard');
     }
 }
