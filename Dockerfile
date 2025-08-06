@@ -10,8 +10,8 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
-    libpq-dev \                     # <== ESTA ES LA CLAVE
-    && docker-php-ext-install pdo pdo_pgsql zip mbstring exif pcntl bcmath gd
+    libpq-dev && \
+    docker-php-ext-install pdo pdo_pgsql zip mbstring exif pcntl bcmath gd
 
 # Instalar Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
@@ -26,15 +26,15 @@ COPY . .
 RUN composer install --no-dev --optimize-autoloader
 
 # Dar permisos adecuados a Laravel
-RUN chown -R www-data:www-data /var/www \
-    && chmod -R 755 /var/www/storage
+RUN chown -R www-data:www-data /var/www && \
+    chmod -R 755 /var/www/storage
 
 # Variables de entorno para producción
 ENV APP_ENV=production
 ENV APP_DEBUG=false
 
-# Exponer el puerto (el que Render espera detectar)
+# Exponer el puerto (Render usa este puerto)
 EXPOSE 10000
 
-# Comando para iniciar el servidor (Render también puede usar startCommand)
+# Comando por defecto (aunque puedes usar startCommand en Render)
 CMD php artisan serve --host=0.0.0.0 --port=${PORT}
