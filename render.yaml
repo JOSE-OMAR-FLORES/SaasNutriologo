@@ -4,34 +4,35 @@ services:
     env: docker
     plan: free
     branch: main
-    buildCommand: ""
-    startCommand: "php artisan config:cache && php artisan migrate --force && php artisan serve --host 0.0.0.0 --port 10000"
+    startCommand: "php artisan migrate --force && php artisan config:cache"
     envVars:
       - key: APP_ENV
         value: production
       - key: APP_KEY
         generateValue: true
+      - key: APP_DEBUG
+        value: false
+      - key: APP_URL
+        value: https://saasnutriologo-9b.onrender.com
       - key: DB_CONNECTION
-        value: mysql
+        value: pgsql
       - key: DB_HOST
-        fromDatabase:
-          name: laravel-db
-          property: host
+        value: dpg-d28omdmuk2gs73fjpgg0-a.oregon-postgres.render.com
       - key: DB_PORT
-        value: 3306
+        value: 5432
       - key: DB_DATABASE
-        fromDatabase:
-          name: laravel-db
-          property: database
+        value: admin_saas
       - key: DB_USERNAME
-        fromDatabase:
-          name: laravel-db
-          property: user
+        value: admin
       - key: DB_PASSWORD
-        fromDatabase:
-          name: laravel-db
-          property: password
+        value: 2TqKFW4MYxbbEkwFscDtdLlLXLXqsovK
+      - key: SESSION_DRIVER
+        value: database
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: CACHE_STORE
+        value: database
 
 databases:
-  - name: laravel-db
+  - name: DBNutri
     plan: free

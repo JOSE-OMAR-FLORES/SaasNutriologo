@@ -1,0 +1,7 @@
+** Base de Datos
+
+Name: DBNutri
+
+DatabaseOptional The Postgres dbname: admin_saas
+
+UserOptional: admin
