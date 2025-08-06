@@ -26,10 +26,6 @@ Route::get('/contacto', function () {
     return view('MVP.contacto');
 })->name("contacto");
 
-Route::get("/terminos", function(){
-    return view("MVP.terminos");
-})->name("terminos");
-
 Route::get('/elige-plan', function () {
     return view('auth.planes');
 })->name('elige.plan');
