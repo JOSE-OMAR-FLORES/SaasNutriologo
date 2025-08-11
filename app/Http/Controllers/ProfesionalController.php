@@ -11,19 +11,71 @@ class ProfesionalController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        //obtenemos al usuario autenticado
-        $user = Auth::user();
+public function index(Request $request)
+{
+    $user = Auth::user();
 
-    // buscamos a los pacientes que le pertenecen al usuario y carga las citas y las notas y los obtenemos y guardamos en la varibale
-        $pacientes = $user->pacientes()->with("citas", "notas")->get();
+    $fechaLimitePago = now()->addDays(30)->toDateString(); // formato YYYY-MM-DD
 
-        $citas = $pacientes->flatMap->citas;
-        $notas = $pacientes->flatMap->notas;
+    // ====================
+    // Pacientes
+    // ====================
+    $pacientesQuery = $user->pacientes()->with('citas', 'notas');
 
-        return view("profesional.dashboard", compact("pacientes", "citas", "notas"));
+    if ($request->filled('filter_nombre')) {
+        $pacientesQuery->where('nombre', 'like', '%' . $request->filter_nombre . '%');
     }
+
+    $pacientes = $pacientesQuery->paginate(5, ['*'], 'pacientes_page');
+
+    // ====================
+    // Citas
+    // ====================
+    $citasQuery = $user->citas()->latest();
+
+    if ($request->filled('filter_nombre')) {
+        $nombre = $request->filter_nombre;
+        $citasQuery->whereHas('paciente', function ($query) use ($nombre) {
+            $query->where('nombre', 'like', '%' . $nombre . '%');
+        });
+    }
+
+    if ($request->filled('filter_fecha')) {
+        $citasQuery->where('fecha', $request->filter_fecha);
+    }
+
+    $citas = $citasQuery->paginate(5, ['*'], 'citas_page');
+
+    // ====================
+    // Notas
+    // ====================
+    $notasQuery = $user->notas()->latest();
+
+    if ($request->filled('filter_nombre')) {
+        $nombre = $request->filter_nombre;
+        $notasQuery->whereHas('paciente', function ($query) use ($nombre) {
+            $query->where('nombre', 'like', '%' . $nombre . '%');
+        });
+    }
+
+    if ($request->filled('filter_fecha')) {
+        $notasQuery->where('fecha', $request->filter_fecha);
+    }
+
+    $notas = $notasQuery->paginate(5, ['*'], 'notas_page');
+
+    return view('profesional.dashboard', compact(
+        'pacientes',
+        'citas',
+        'notas',
+        'fechaLimitePago'
+    ));
+}
+
+
+
+
+
 
     /**
      * Show the form for creating a new resource.

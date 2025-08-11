@@ -62,9 +62,11 @@ Route::delete('/admin/usuarios/{id}/delete', [AdminController::class, 'destroy']
 
 Route::middleware(['auth', 'role:clinica'])->prefix('clinica')->name('clinica.')->group(function () {
     Route::get('/dashboard', [ClinicaController::class, 'index'])->name('dashboard');
+    Route::get('/pacientes', [ClinicaController::class, 'pacientesPorNutriologo'])->name('nutriologos.verPacientes');
 
-    // Rutas para el CRUD de nutriólogos
-    Route::get('/nutriologos', [ClinicaController::class, 'index'])->name('nutriologos.index');
+
+    // CRUD Nutriólogos
+    Route::get('/nutriologos', [ClinicaController::class, 'nutriologosIndex'])->name('nutriologos.index');
     Route::get('/nutriologos/create', [ClinicaController::class, 'create'])->name('nutriologos.create');
     Route::post('/nutriologos', [ClinicaController::class, 'store'])->name('nutriologos.store');
     Route::get('/nutriologos/{id}', [ClinicaController::class, 'show'])->name('nutriologos.show');
@@ -72,6 +74,8 @@ Route::middleware(['auth', 'role:clinica'])->prefix('clinica')->name('clinica.')
     Route::put('/nutriologos/{id}', [ClinicaController::class, 'update'])->name('nutriologos.update');
     Route::delete('/nutriologos/{id}', [ClinicaController::class, 'destroy'])->name('nutriologos.destroy');
 });
+
+
 
 
 

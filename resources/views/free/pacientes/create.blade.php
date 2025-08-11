@@ -55,7 +55,7 @@
                 required>
           <option value="">Seleccionar</option>
           <option value="Masculino">Masculino</option>
-          <option value="Femenino">Femenino</option>
+          <option value="Femenina">Femenina</option>
           <option value="Otro">Otro</option>
         </select>
         <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">

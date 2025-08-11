@@ -2,12 +2,12 @@
 
 @section('content')
 
-{{-- Evita parpadeo de elementos con x-cloak --}}
 <style>
     [x-cloak] { display: none !important; }
 </style>
 
 <div x-data="userDashboard()" class="container mx-auto px-4 py-8">
+    <!-- Header y filtros -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <h1 class="text-2xl font-bold text-gray-800 flex items-center">
             <svg class="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -39,77 +39,107 @@
         </div>
     </div>
 
-    <div class="bg-white rounded-xl shadow-md overflow-hidden mb-8">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gradient-to-r from-green-600 to-green-500">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Usuario</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Rol</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Registro</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-white uppercase tracking-wider">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    @forelse($usuarios as $usuario)
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="flex items-center">
-                                <div class="flex-shrink-0 h-10 w-10 bg-green-100 rounded-full flex items-center justify-center text-green-800 font-bold">
-                                    {{ strtoupper(substr($usuario->name, 0, 1)) }}
-                                </div>
-                                <div class="ml-4">
-                                    <div class="text-sm font-medium text-gray-900">{{ $usuario->name }}</div>
-                                    <div class="text-sm text-gray-500">{{ $usuario->email }}</div>
-                                </div>
+    <!-- Tabla de usuarios -->
+<div class="bg-white rounded-xl shadow-md overflow-hidden mb-8">
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gradient-to-r from-green-600 to-green-500">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Usuario</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Rol(es)</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Registro</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Suscripción 30 días</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-white uppercase tracking-wider">Acciones</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                @forelse($usuarios as $usuario)
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10 bg-green-100 rounded-full flex items-center justify-center text-green-800 font-bold">
+                                {{ strtoupper(substr($usuario->name, 0, 1)) }}
                             </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="flex flex-wrap gap-1">
-                                @foreach($usuario->roles as $role)
-                                <span class="px-2 py-1 text-xs rounded-full 
-                                    {{ $role->name === 'admin' ? 'bg-purple-100 text-purple-800' : 
-                                       ($role->name === 'profesional' ? 'bg-blue-100 text-blue-800' : 
-                                       'bg-green-100 text-green-800') }}">
-                                    {{ $role->name }}
-                                </span>
-                                @endforeach
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-900">{{ $usuario->name }}</div>
+                                <div class="text-sm text-gray-500">{{ $usuario->email }}</div>
                             </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {{ $usuario->created_at->format('d/m/Y') }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <div class="flex justify-end space-x-2">
-                                <button @click="openEditModal({{ $usuario->id }}, '{{ addslashes($usuario->name) }}', '{{ $usuario->email }}', {{ $usuario->roles->pluck('name') }})" 
-                                    class="text-yellow-600 hover:text-yellow-900">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex flex-wrap gap-2">
+                            @foreach($usuario->roles as $role)
+                            <span class="flex items-center gap-1 px-2 py-1 text-xs rounded-full
+                                {{ $role->name === 'admin' ? 'bg-purple-100 text-purple-800' : 
+                                   ($role->name === 'profesional' ? 'bg-blue-100 text-blue-800' : 
+                                   'bg-green-100 text-green-800') }}">
+                                @if($role->name === 'admin')
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 2l3 7H9l3-7zM12 12v10" />
+                                </svg>
+                                @elseif($role->name === 'profesional')
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <circle cx="12" cy="7" r="4" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5.5 21a7 7 0 0113 0" />
+                                </svg>
+                                @else
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 12c-2 0-4-1-4-3s1-3 3-3 3 1 3 3-2 3-2 3z" />
+                                </svg>
+                                @endif
+                                {{ $role->name }}
+                            </span>
+                            @endforeach
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {{ $usuario->created_at->format('d/m/Y') }}
+                    </td>
+
+                    <!-- Nueva columna Suscripción 30 días -->
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        
+                        <div><strong>Días restantes:</strong> 30</div>
+                        <div>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800">
+                                Activa
+                            </span>
+                        </div>
+                    </td>
+
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <div class="flex justify-end space-x-2">
+                            <button @click="openEditModal({{ $usuario->id }}, '{{ addslashes($usuario->name) }}', '{{ $usuario->email }}', @json($usuario->roles->pluck('name')))" 
+                                class="text-yellow-600 hover:text-yellow-900" title="Editar">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                            </button>
+                            <form action="{{ route('admin.usuarios.destroy', $usuario->id) }}" method="POST" class="inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="button" onclick="confirmDelete('{{ addslashes($usuario->name) }}', this.form)"
+                                    class="text-red-600 hover:text-red-900" title="Eliminar">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                     </svg>
                                 </button>
-                                <form action="{{ route('admin.usuarios.destroy', $usuario->id) }}" method="POST" class="inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="button" onclick="confirmDelete('{{ addslashes($usuario->name) }}', this.form)"
-                                        class="text-red-600 hover:text-red-900">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="4" class="px-6 py-4 text-center text-gray-500">
-                            No se encontraron usuarios
-                        </td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                        No se encontraron usuarios
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+</div>
+
         
         @if($usuarios->hasPages())
         <div class="px-6 py-3 bg-gray-50 border-t border-gray-200">
@@ -118,22 +148,31 @@
         @endif
     </div>
 
+    <!-- Gráfica de distribución por rol -->
     @if(isset($usuariosPorRol) && is_array($usuariosPorRol))
     <div class="bg-white p-6 rounded-xl shadow-md mb-8">
-        <h2 class="text-xl font-semibold text-gray-800 mb-4">Distribución por Rol</h2>
+        <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v18h18" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16 9l-4 4-4-4" />
+            </svg>
+            Distribución por Rol
+        </h2>
         <div class="relative w-full" style="height: 400px;">
             <canvas id="chartUsuarios"></canvas>
         </div>
     </div>
     @endif
 
+    
 
+    <!-- Modal editar usuario -->
     <div x-show="editModalOpen" x-transition.opacity x-cloak
         class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div @click.away="editModalOpen = false" class="bg-white rounded-xl p-6 w-full max-w-md shadow-lg">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-bold text-gray-800">Editar Usuario</h2>
-                <button @click="editModalOpen = false" class="text-gray-400 hover:text-gray-500">
+                <button @click="editModalOpen = false" class="text-gray-400 hover:text-gray-500" aria-label="Cerrar">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -159,12 +198,12 @@
                     @if(isset($rolesDisponibles))
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Roles</label>
-                        <div class="space-y-2">
+                        <div class="space-y-2 max-h-48 overflow-y-auto">
                             @foreach($rolesDisponibles as $role)
-                            <label class="inline-flex items-center">
+                            <label class="inline-flex items-center cursor-pointer">
                                 <input type="checkbox" name="roles[]" value="{{ $role->name }}"
                                     x-model="editUser.roles" class="rounded text-green-600 focus:ring-green-500">
-                                <span class="ml-2">{{ ucfirst($role->name) }}</span>
+                                <span class="ml-2 select-none">{{ ucfirst($role->name) }}</span>
                             </label>
                             @endforeach
                         </div>
@@ -187,7 +226,10 @@
     </div>
 </div>
 
+
 <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+<script src="https://cdn.jsdelivr"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>

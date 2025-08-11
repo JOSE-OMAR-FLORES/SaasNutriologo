@@ -1,6 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
+
+
 <div class="min-h-screen bg-gradient-to-b from-gray-50 to-white py-8 px-4">
   <div class="max-w-7xl mx-auto">
     <!-- Header -->
@@ -23,6 +25,35 @@
         </div>
       </div>
     </div>
+    <!-- Contador en Navbar, justo antes del menú de usuario -->
+<div class="mb-0 text-sm text-gray-500 italic pr-4 flex items-center" style="min-width: 130px; justify-content: flex-end; font-feature-settings: 'tnum';">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
+  Próximo pago: <span id="countdown" class="font-mono ml-1 text-emerald-700"></span>
+</div>
+
+<script>
+  const deadline = new Date("{{ $fechaLimitePago }}T23:59:59").getTime();
+
+  function updateCountdown() {
+    const now = new Date().getTime();
+    const distance = deadline - now;
+
+    if (distance < 0) {
+      document.getElementById("countdown").textContent = "Pago vencido";
+      clearInterval(interval);
+      return;
+    }
+
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    document.getElementById("countdown").textContent = days + (days === 1 ? " día" : " días");
+  }
+
+  updateCountdown();
+  const interval = setInterval(updateCountdown, 60000);
+</script>
+
 
     @if(session('success'))
       <div class="mb-6 p-4 bg-green-100 text-green-800 rounded-lg border border-green-200 animate-pulse">
@@ -47,7 +78,7 @@
           </div>
           <div>
             <h3 class="text-gray-500 text-sm font-medium">Pacientes</h3>
-            <p class="text-2xl font-bold text-blue-600">{{ $pacientes->count() }}</p>
+            <p class="text-2xl font-bold text-blue-600">{{ $pacientes->total() }}</p>
           </div>
         </div>
       </div>
@@ -86,6 +117,45 @@
         </div>
       </div>
     </div>
+
+
+<form method="GET" action="{{ route('profesional.dashboard') }}" class="mb-6 flex flex-wrap items-end gap-4">
+  <div class="flex-1 min-w-[200px]">
+    <label for="filter_nombre" class="block text-sm font-medium text-gray-700">Buscar paciente</label>
+    <input 
+      type="text" 
+      name="filter_nombre" 
+      id="filter_nombre"
+      value="{{ request('filter_nombre') }}" 
+      placeholder="Nombre del paciente..." 
+      class="mt-1 border rounded-lg px-3 py-2 w-full shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+    />
+  </div>
+
+  <div>
+    <label for="filter_fecha" class="block text-sm font-medium text-gray-700">Filtrar por fecha</label>
+    <input 
+      type="date" 
+      name="filter_fecha" 
+      id="filter_fecha"
+      value="{{ request('filter_fecha') }}" 
+      class="mt-1 border rounded-lg px-3 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+    />
+  </div>
+
+  <div>
+    <button 
+      type="submit" 
+      class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+    >
+      Filtrar
+    </button>
+  </div>
+</form>
+
+
+
+
 
     <!-- Sección Pacientes -->
     <section class="mb-10">
@@ -144,6 +214,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                       </svg>
                     </a>
+                  
                     
                     <!-- Editar Paciente -->
                     <a href="{{ route('profesional.pacientes.edit', $paciente) }}" 
@@ -170,6 +241,10 @@
           </div>
         @endif
       </div>
+      <div class="mt-4">
+  {{ $pacientes->links() }}
+</div>
+
     </section>
 
     <!-- Sección Citas -->
