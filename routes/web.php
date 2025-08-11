@@ -106,3 +106,5 @@ Route::middleware(['auth', 'role:free'])->group(function () {
 });
 
 //Todo: admin@miapp.com , "admin1234"
+
+
