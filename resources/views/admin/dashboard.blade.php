@@ -1,143 +1,301 @@
 @extends('layouts.app')
 
 @section('content')
-<div x-data="userModals()" class="container mx-auto px-4 py-8">
 
-    <!-- Filtro por rol -->
-    <form method="GET" action="{{ route('admin.dashboard') }}" class="mb-8 flex items-center gap-4">
-        <label for="rol" class="text-green-700 font-semibold text-lg">Filtrar por rol:</label>
-        <select name="rol" id="rol" onchange="this.form.submit()"
-            class="appearance-none border border-green-300 bg-white text-green-800 font-medium px-5 py-2 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 hover:border-green-500">
-            <option value="">Todos</option>
-            <option value="free" {{ request('rol') === 'free' ? 'selected' : '' }}>Free</option>
-            <option value="clinica" {{ request('rol') === 'clinica' ? 'selected' : '' }}>Clínica</option>
-            <option value="profesional" {{ request('rol') === 'profesional' ? 'selected' : '' }}>Profesional</option>
-        </select>
-    </form>
+<style>
+    [x-cloak] { display: none !important; }
+</style>
+
+<div x-data="userDashboard()" class="container mx-auto px-4 py-8">
+    <!-- Header y filtros -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <h1 class="text-2xl font-bold text-gray-800 flex items-center">
+            <svg class="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+            Gestión de Usuarios
+        </h1>
+        
+        <div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+            <form method="GET" action="{{ route('admin.dashboard') }}" class="flex items-center gap-2">
+                <label for="rol" class="text-gray-700 font-medium">Filtrar por rol:</label>
+                <select name="rol" id="rol" x-on:change="$el.form.submit()"
+                    class="border border-gray-300 bg-white text-gray-700 px-3 py-2 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 hover:border-green-500 transition">
+                    <option value="">Todos</option>
+                    @foreach(['free', 'clinica', 'profesional'] as $role)
+                    <option value="{{ $role }}" {{ request('rol') === $role ? 'selected' : '' }}>
+                        {{ ucfirst($role) }}
+                    </option>
+                    @endforeach
+                </select>
+            </form>
+            
+            <form method="GET" action="{{ route('admin.dashboard') }}" class="flex items-center gap-2">
+                <label for="search" class="text-gray-700 font-medium">Buscar:</label>
+                <input type="text" name="search" id="search" value="{{ request('search') }}"
+                    class="border border-gray-300 bg-white text-gray-700 px-3 py-2 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 hover:border-green-500 transition"
+                    placeholder="Nombre del usuario" x-on:keyup.debounce.300ms="$el.form.submit()">
+            </form> 
+        </div>
+    </div>
 
     <!-- Tabla de usuarios -->
-    <div class="overflow-x-auto shadow-md rounded-lg bg-white mb-8">
-        <table class="min-w-full table-auto">
-            <thead class="bg-gradient-to-r from-green-600 to-green-400 text-white">
+<div class="bg-white rounded-xl shadow-md overflow-hidden mb-8">
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gradient-to-r from-green-600 to-green-500">
                 <tr>
-                    <th class="px-4 py-3 text-left text-sm font-medium">Nombre</th>
-                    <th class="px-4 py-3 text-left text-sm font-medium">Correo</th>
-                    <th class="px-4 py-3 text-left text-sm font-medium">Rol</th>
-                    <th class="px-4 py-3 text-left text-sm font-medium">Acciones</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Usuario</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Rol(es)</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Registro</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Suscripción 30 días</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-white uppercase tracking-wider">Acciones</th>
                 </tr>
             </thead>
-            <tbody>
-                @foreach($usuarios as $usuario)
-                <tr class="border-b hover:bg-gray-50 transition">
-                    <td class="px-4 py-3">{{ $usuario->name }}</td>
-                    <td class="px-4 py-3">{{ $usuario->email }}</td>
-                    <td class="px-4 py-3">{{ $usuario->roles->pluck('name')->implode(', ') }}</td>
-                    <td class="px-4 py-3 space-x-2">
-                        <button 
-                            @click="openEditModal({{ $usuario->id }}, '{{ $usuario->name }}', '{{ $usuario->email }}')" 
-                            class="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-1 rounded-lg transition duration-200"
-                        >
-                            ✏️ Editar
-                        </button>
-                        <form action="{{ route('admin.usuarios.destroy', $usuario->id) }}" method="POST" class="inline">
-                            @csrf
-                            @method('DELETE')
-                            <button 
-                                onclick="return confirm('¿Estás seguro que deseas eliminar a {{ $usuario->name }}?')"
-                                class="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded-lg transition duration-200"
-                            >
-                                🗑️ Eliminar
+            <tbody class="bg-white divide-y divide-gray-200">
+                @forelse($usuarios as $usuario)
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10 bg-green-100 rounded-full flex items-center justify-center text-green-800 font-bold">
+                                {{ strtoupper(substr($usuario->name, 0, 1)) }}
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-900">{{ $usuario->name }}</div>
+                                <div class="text-sm text-gray-500">{{ $usuario->email }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex flex-wrap gap-2">
+                            @foreach($usuario->roles as $role)
+                            <span class="flex items-center gap-1 px-2 py-1 text-xs rounded-full
+                                {{ $role->name === 'admin' ? 'bg-purple-100 text-purple-800' : 
+                                   ($role->name === 'profesional' ? 'bg-blue-100 text-blue-800' : 
+                                   'bg-green-100 text-green-800') }}">
+                                @if($role->name === 'admin')
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 2l3 7H9l3-7zM12 12v10" />
+                                </svg>
+                                @elseif($role->name === 'profesional')
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <circle cx="12" cy="7" r="4" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5.5 21a7 7 0 0113 0" />
+                                </svg>
+                                @else
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 12c-2 0-4-1-4-3s1-3 3-3 3 1 3 3-2 3-2 3z" />
+                                </svg>
+                                @endif
+                                {{ $role->name }}
+                            </span>
+                            @endforeach
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {{ $usuario->created_at->format('d/m/Y') }}
+                    </td>
+
+                    <!-- Nueva columna Suscripción 30 días -->
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        
+                        <div><strong>Días restantes:</strong> 30</div>
+                        <div>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800">
+                                Activa
+                            </span>
+                        </div>
+                    </td>
+
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <div class="flex justify-end space-x-2">
+                            <button @click="openEditModal({{ $usuario->id }}, '{{ addslashes($usuario->name) }}', '{{ $usuario->email }}', @json($usuario->roles->pluck('name')))" 
+                                class="text-yellow-600 hover:text-yellow-900" title="Editar">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
                             </button>
-                        </form>
+                            <form action="{{ route('admin.usuarios.destroy', $usuario->id) }}" method="POST" class="inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="button" onclick="confirmDelete('{{ addslashes($usuario->name) }}', this.form)"
+                                    class="text-red-600 hover:text-red-900" title="Eliminar">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
-                @endforeach
+                @empty
+                <tr>
+                    <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                        No se encontraron usuarios
+                    </td>
+                </tr>
+                @endforelse
             </tbody>
         </table>
     </div>
+</div>
 
-    <!-- Gráfica -->
-    <div class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-md mb-8">
-        <h2 class="text-xl font-semibold text-gray-800 mb-4">Resumen por Rol</h2>
-        <canvas id="chartUsuarios" class="w-full h-64"></canvas>
+        
+        @if($usuarios->hasPages())
+        <div class="px-6 py-3 bg-gray-50 border-t border-gray-200">
+            {{ $usuarios->appends(request()->query())->links() }}
+        </div>
+        @endif
     </div>
 
-    <!-- Modal Editar Usuario -->
-    <div 
-        x-show="editModalOpen"
-        x-transition.opacity
-        x-cloak
-        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-    >
-        <div class="bg-white rounded-xl p-6 w-full max-w-md shadow-lg">
-            <h2 class="text-xl font-bold mb-4 text-gray-800">Editar Usuario</h2>
+    <!-- Gráfica de distribución por rol -->
+    @if(isset($usuariosPorRol) && is_array($usuariosPorRol))
+    <div class="bg-white p-6 rounded-xl shadow-md mb-8">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v18h18" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16 9l-4 4-4-4" />
+            </svg>
+            Distribución por Rol
+        </h2>
+        <div class="relative w-full" style="height: 400px;">
+            <canvas id="chartUsuarios"></canvas>
+        </div>
+    </div>
+    @endif
+
+    
+
+    <!-- Modal editar usuario -->
+    <div x-show="editModalOpen" x-transition.opacity x-cloak
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div @click.away="editModalOpen = false" class="bg-white rounded-xl p-6 w-full max-w-md shadow-lg">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800">Editar Usuario</h2>
+                <button @click="editModalOpen = false" class="text-gray-400 hover:text-gray-500" aria-label="Cerrar">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            
             <form :action="`/admin/usuarios/${editUser.id}`" method="POST">
                 @csrf
                 @method('PUT')
-                <div class="mb-4">
-                    <label class="block text-gray-700 font-medium">Nombre</label>
-                    <input type="text" name="name" class="w-full border px-4 py-2 rounded-lg focus:ring focus:ring-green-300" x-model="editUser.name" required>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+                        <input type="text" name="name" x-model="editUser.name" required
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-green-500 focus:border-green-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Correo</label>
+                        <input type="email" name="email" x-model="editUser.email" required
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-green-500 focus:border-green-500">
+                    </div>
+                    
+                    @if(isset($rolesDisponibles))
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Roles</label>
+                        <div class="space-y-2 max-h-48 overflow-y-auto">
+                            @foreach($rolesDisponibles as $role)
+                            <label class="inline-flex items-center cursor-pointer">
+                                <input type="checkbox" name="roles[]" value="{{ $role->name }}"
+                                    x-model="editUser.roles" class="rounded text-green-600 focus:ring-green-500">
+                                <span class="ml-2 select-none">{{ ucfirst($role->name) }}</span>
+                            </label>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
                 </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 font-medium">Correo</label>
-                    <input type="email" name="email" class="w-full border px-4 py-2 rounded-lg focus:ring focus:ring-green-300" x-model="editUser.email" required>
-                </div>
-                <div class="flex justify-end space-x-2">
-                    <button @click="editModalOpen = false" type="button" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Guardar</button>
+                
+                <div class="mt-6 flex justify-end space-x-3">
+                    <button type="button" @click="editModalOpen = false"
+                        class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                        Cancelar
+                    </button>
+                    <button type="submit"
+                        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                        Guardar Cambios
+                    </button>
                 </div>
             </form>
         </div>
     </div>
-
 </div>
 
+
 <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+<script src="https://cdn.jsdelivr"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-document.addEventListener('alpine:init', () => {
-    Alpine.data('userModals', () => ({
-        editModalOpen: false,
-        editUser: { id: null, name: '', email: '' },
+// Función para confirmar eliminación
+function confirmDelete(userName, form) {
+    if (confirm(`¿Estás seguro de eliminar al usuario ${userName}?`)) {
+        form.submit();
+    }
+}
 
-        openEditModal(id, name, email) {
-            this.editUser = { id, name, email };
+// Inicializar Alpine.js
+document.addEventListener('alpine:init', () => {
+    Alpine.data('userDashboard', () => ({
+        editModalOpen: false,
+        editUser: { 
+            id: null, 
+            name: '', 
+            email: '',
+            roles: []
+        },
+
+        openEditModal(id, name, email, roles = []) {
+            this.editUser = { id, name, email, roles };
             this.editModalOpen = true;
         }
-    }))
+    }));
 });
 
-// Datos para Chart.js
-const data = @json(array_values($usuariosPorRol));
-const labels = @json(array_keys($usuariosPorRol));
-
-// Inicializar gráfica
+// Inicializar gráfica solo si existe el elemento
 window.addEventListener('DOMContentLoaded', () => {
-    const ctx = document.getElementById('chartUsuarios').getContext('2d');
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Usuarios por Rol',
-                data: data,
-                backgroundColor: [
-                    '#16a34a',
-                    '#22c55e',
-                    '#4ade80'
-                ],
-                borderColor: '#065f46',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: { beginAtZero: true, ticks: { precision: 0 } }
+    const chartElement = document.getElementById('chartUsuarios');
+    if (chartElement) {
+        const ctx = chartElement.getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: @json(isset($usuariosPorRol) ? array_keys($usuariosPorRol) : []),
+                datasets: [{
+                    label: 'Cantidad de Usuarios',
+                    data: @json(isset($usuariosPorRol) ? array_values($usuariosPorRol) : []),
+                    backgroundColor: [
+                        '#3B82F6', // blue
+                        '#10B981', // emerald
+                        '#F59E0B', // amber
+                        '#8B5CF6'  // violet
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
             }
-        }
-    });
+        });
+    }
 });
 </script>
 @endsection
