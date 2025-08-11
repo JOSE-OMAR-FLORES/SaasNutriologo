@@ -3,10 +3,6 @@
 @section('content')
 <div class="min-h-screen flex items-center justify-center bg-gray-50 relative overflow-hidden">
   <!-- Fondo estilo WhatsApp en verdes -->
-  <div class="absolute inset-0 z-0 opacity-150">
-    <div class="absolute inset-0 bg-[url('https://i.imgur.com/JQ9pXmz.png')] bg-cover bg-center"></div>
-    <div class="absolute inset-0 bg-gradient-to-b from-emerald-100/30 to-white"></div>
-  </div>
 
   <!-- Tarjeta de login -->
   <div class="relative z-10 bg-white/95 backdrop-blur-sm rounded-xl shadow-xl overflow-hidden w-full max-w-md mx-4 border border-gray-200 animate-fade-in">

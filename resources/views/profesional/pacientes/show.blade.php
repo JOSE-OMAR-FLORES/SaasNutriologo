@@ -145,71 +145,73 @@
           </table>
         </div>
 
-        <!-- Gráfica -->
-        <div class="mt-8">
-          <h4 class="text-lg font-medium text-gray-800 mb-4 flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-            Evolución del Peso
-          </h4>
-          <canvas id="pesoChart" class="w-full h-80"></canvas>
-          <script>
-            const ctx = document.getElementById('pesoChart').getContext('2d');
-            const pesoChart = new Chart(ctx, {
-              type: 'line',
-              data: {
+<!-- Gráfica -->
+<div class="mt-8">
+    <h4 class="text-lg font-medium text-gray-800 mb-4 flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+        Evolución del Peso
+    </h4>
+    <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200" style="height: 400px;">
+        <canvas id="pesoChart" style="height: 350px; width: 100%;"></canvas>
+    </div>
+    <script>
+        const ctx = document.getElementById('pesoChart').getContext('2d');
+        const pesoChart = new Chart(ctx, {
+            type: 'line',
+            data: {
                 labels: {!! json_encode($fechas) !!},
                 datasets: [{
-                  label: 'Peso (kg)',
-                  data: {!! json_encode($pesos) !!},
-                  backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                  borderColor: 'rgba(59, 130, 246, 1)',
-                  borderWidth: 2,
-                  tension: 0.3,
-                  fill: true,
-                  pointBackgroundColor: 'rgba(59, 130, 246, 1)',
-                  pointRadius: 4,
-                  pointHoverRadius: 6
+                    label: 'Peso (kg)',
+                    data: {!! json_encode($pesos) !!},
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: true,
+                    pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+                    pointRadius: 4,
+                    pointHoverRadius: 6
                 }]
-              },
-              options: {
+            },
+            options: {
                 responsive: true,
-                maintainAspectRatio: false,
+                maintainAspectRatio: false, // Esto evita que la gráfica se distorsione
                 scales: {
-                  y: {
-                    beginAtZero: false,
-                    grid: {
-                      drawBorder: false
+                    y: {
+                        beginAtZero: false,
+                        grid: {
+                            drawBorder: false
+                        },
+                        suggestedMax: Math.max(...{!! json_encode($pesos) !!}) * 1.2 // Añade un 20% de espacio arriba
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
                     }
-                  },
-                  x: {
-                    grid: {
-                      display: false
-                    }
-                  }
                 },
                 plugins: {
-                  legend: {
-                    display: false
-                  },
-                  tooltip: {
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    titleFont: {
-                      size: 14
+                    legend: {
+                        display: false
                     },
-                    bodyFont: {
-                      size: 12
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleFont: {
+                            size: 14
+                        },
+                        bodyFont: {
+                            size: 12
+                        }
                     }
-                  }
                 }
-              }
-            });
-          </script>
-        </div>
+            }
+        });
+    </script>
+</div>
       @endif
     </div>
-
     <!-- Acciones -->
     <div class="mt-6 flex justify-between">
       <a href="{{ route('profesional.pacientes.edit', $paciente) }}" 
